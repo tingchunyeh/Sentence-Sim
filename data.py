@@ -48,19 +48,19 @@ def create_pair_data(kb_answer):
     pairs_df.columns = ['s1', 's2', 'score']
     return pairs_df
 
-def read_kb_answer(data_path):
-    kb_answer = pd.read_csv(data_path+'/kb.csv').dropna(axis=1)
-    ha_answer = pd.read_csv(data_path+'/qa_history.csv').dropna(subset=['参考答案分词', '坐席回复分词', '坐席回复'], how='any')
-    kb_answer['默认答案'] = pd.Categorical(kb_answer['默认答案'])
-    kb_answer['code'] = kb_answer['默认答案'].cat.codes
-    kb_answer['分类'] = pd.Categorical(kb_answer['分类'])
-    kb_answer['code2'] = kb_answer['分类'].cat.codes
-    kb_answer = kb_answer[['问题分词', 'code', 'code2']]
-    print("original shape: ", kb_answer.shape)
+def read_kb(data_path):
+    kb = pd.read_csv(data_path+'/kb.csv').dropna(axis=1)
+#     ha = pd.read_csv(data_path+'/qa_history.csv').dropna(subset=['参考答案分词', '坐席回复分词', '坐席回复'], how='any')
+    kb['默认答案'] = pd.Categorical(kb['默认答案'])
+    kb['code'] = kb['默认答案'].cat.codes
+    kb['分类'] = pd.Categorical(kb['分类'])
+    kb['code2'] = kb['分类'].cat.codes
+    kb = kb[['问题分词', 'code', 'code2']]
+    print("original shape: ", kb.shape)
     print("dropping duplicates ...")
-    kb_answer = kb_answer.drop_duplicates("问题分词")
-    print("after dropping duplicates: ", kb_answer.shape)
-    return kb_answer
+    kb = kb.drop_duplicates("问题分词")
+    print("after dropping duplicates: ", kb.shape)
+    return kb
 
 def get_word_dict(sentences):
     # create vocab of dict
@@ -105,11 +105,11 @@ def get_nl(data_path):
     dico_label = {'0': 0,  '3': 1, '5': 2}
     for data_type in ['train', 'dev', 'test']:
         s1[data_type], s2[data_type], target[data_type] = {}, {}, {}
-        data = data_type+".csv"
-        print("processing {} ...".format( os.path.join(data_path, data)))
-        s1[data_type]['sent']= np.array([line.rstrip().split(",")[0] for line in open(data , mode='r', encoding='utf-8-sig')])
-        s2[data_type]['sent']= np.array([line.rstrip().split(",")[1] for line in open(data , mode='r', encoding='utf-8-sig')])
-        target[data_type]['data']= np.array([ dico_label[line.rstrip().split(",")[2]] for line in open(data , mode='r', encoding='utf-8-sig')])
+        file = os.path.join(data_path, data_type+".csv")
+        print("processing {} ...".format(file))
+        s1[data_type]['sent']= np.array([line.rstrip().split(",")[0] for line in open(file , mode='r', encoding='utf-8-sig')])
+        s2[data_type]['sent']= np.array([line.rstrip().split(",")[1] for line in open(file , mode='r', encoding='utf-8-sig')])
+        target[data_type]['data']= np.array([ dico_label[line.rstrip().split(",")[2]] for line in open(file , mode='r', encoding='utf-8-sig')])
         
         assert len(s1[data_type]['sent']) == len(s2[data_type]['sent']) == len(target[data_type]['data'])
         print('** {0} DATA : Found {1} pairs of {2} sentences.'.format(

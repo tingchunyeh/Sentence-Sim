@@ -3,9 +3,12 @@ from data import *
 from models import *
 import argparse
 import os
-
+import pickle
 
 parser = argparse.ArgumentParser(description='NLI training')
+
+parser.add_argument("--data_path", type=str, default='./data', help="path to data")
+
 
 # model
 parser.add_argument("--encoder_type", type=str, default='GRUEncoder', help="see list of encoders")
@@ -38,7 +41,7 @@ torch.cuda.manual_seed(10)
 """
 DATA
 """
-train, dev, test = get_nl("")
+train, dev, test = get_nl(params.data_path)
 wv, default_wv = build_vocab(np.append(train['s1'], train['s2']), "w2v-model.txt")
 
 
@@ -161,6 +164,8 @@ def evaluate(epoch, eval_type='dev', final_eval=False):
         print('togrep : results : epoch {0} ; mean accuracy {1} :{2}'.format(epoch, eval_type, eval_acc))
 
     if eval_type == 'dev' and eval_acc > val_acc_best:
+        with open( os.path.join("saved_model", params.saved_model_name+"_cnofig.pickle" ), 'wb') as handle:
+            pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
         print('saving model at epoch {0}'.format(epoch))
         if not os.path.exists("saved_model"): os.makedirs("saved_model")
         torch.save(nli_net.state_dict(), os.path.join("saved_model", params.saved_model_name))
@@ -177,6 +182,7 @@ Train model
 train_loss_ls = []
 train_acc_ls = []
 eval_acc_ls = []
+
 for i in range(params.n_epochs):
     print('\nTRAINING : Epoch ' + str(i))
     train_loss, train_acc = trainepoch(i)

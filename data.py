@@ -26,7 +26,7 @@ def create_pair_data(kb_answer):
     pairs = []
     time.sleep(1)
     for s_id in tqdm(kb_answer.index):
-        sentence, code, code2 = kb_answer.loc[s_id, '问题分词'], kb_answer.loc[s_id, 'code'], kb_answer.loc[s_id, 'code2']
+        sentence, code, code2 = kb_answer.loc[s_id, 'question'], kb_answer.loc[s_id, 'code'], kb_answer.loc[s_id, 'code2']
         same_code_sentences = kb_answer[kb_answer.code == code]
         same_code2_sentences = kb_answer[kb_answer.code2 == code2]
         
@@ -38,27 +38,27 @@ def create_pair_data(kb_answer):
         # random sample at most 10 sentence in different code2
         different_samples = kb_answer.sample(n=20)
         
-        for s2 in same_code_samples['问题分词']:
+        for s2 in same_code_samples['question']:
             pairs.append((sentence, s2, 5))
-        for s2 in same_code2_samples['问题分词']:
+        for s2 in same_code2_samples['question']:
             pairs.append((sentence, s2, 3))
-        for s2 in different_samples['问题分词']:
+        for s2 in different_samples['question']:
             pairs.append((sentence, s2, 0))
     pairs_df = pd.DataFrame(pairs)
     pairs_df.columns = ['s1', 's2', 'score']
     return pairs_df
 
 def read_kb(data_path):
-    kb = pd.read_csv(data_path+'/kb.csv').dropna(axis=1)
+    kb = pd.read_csv(os.path.join(data_path,'kb_parsed_tokenized.csv'))
 #     ha = pd.read_csv(data_path+'/qa_history.csv').dropna(subset=['参考答案分词', '坐席回复分词', '坐席回复'], how='any')
-    kb['默认答案'] = pd.Categorical(kb['默认答案'])
-    kb['code'] = kb['默认答案'].cat.codes
-    kb['分类'] = pd.Categorical(kb['分类'])
-    kb['code2'] = kb['分类'].cat.codes
-    kb = kb[['问题分词', 'code', 'code2']]
+    kb['default_answer'] = pd.Categorical(kb['default_answer'])
+    kb['code'] = kb['default_answer'].cat.codes
+    kb['category'] = pd.Categorical(kb['category'])
+    kb['code2'] = kb['category'].cat.codes
+    kb = kb[['question', 'code', 'code2']]
     print("original shape: ", kb.shape)
     print("dropping duplicates ...")
-    kb = kb.drop_duplicates("问题分词")
+    kb = kb.drop_duplicates(subset= ["question"])
     print("after dropping duplicates: ", kb.shape)
     return kb
 

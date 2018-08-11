@@ -107,7 +107,7 @@ def trainepoch(epoch):
         tgt_batch = Variable(torch.LongTensor(target[stidx:stidx+params.batch_size])).cuda()
         k = s1_batch.size(1)
         output = nli_net((s1_batch, s1_len), (s2_batch, s2_len))
-
+        
         pred = output.data.max(1)[1]
         correct += pred.long().eq(tgt_batch.data.long()).cpu().sum().item()
 
@@ -115,11 +115,12 @@ def trainepoch(epoch):
         loss = loss_fn(output, tgt_batch)
         all_costs.append(loss.item())
         tot_costs.append(loss.item())
+        
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
+ 
         if len(all_costs) == 100:
             logs.append('{0} ; loss {1}  ; accuracy train : {2}'.format(stidx, 
                             round(np.mean(all_costs), 2), round(100.*correct/(stidx+k), 2)))

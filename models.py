@@ -67,6 +67,7 @@ class NLINet(nn.Module):
 			nn.Tanh(),
 			nn.Dropout(p=self.dpout_fc),
 			nn.Linear(self.fc_dim, self.n_classes),
+            nn.Softmax(dim=-1),
 			)
 
 

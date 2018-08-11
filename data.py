@@ -51,8 +51,8 @@ def create_pair_data(kb_answer):
 def read_kb(data_path):
     kb = pd.read_csv(os.path.join(data_path,'kb_parsed_tokenized.csv'))
 #     ha = pd.read_csv(data_path+'/qa_history.csv').dropna(subset=['参考答案分词', '坐席回复分词', '坐席回复'], how='any')
-    kb['default_answer'] = pd.Categorical(kb['default_answer'])
-    kb['code'] = kb['default_answer'].cat.codes
+    kb['answer'] = pd.Categorical(kb['answer'])
+    kb['code'] = kb['answer'].cat.codes
     kb['category'] = pd.Categorical(kb['category'])
     kb['code2'] = kb['category'].cat.codes
     kb = kb[['question', 'code', 'code2']]

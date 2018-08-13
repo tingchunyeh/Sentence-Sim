@@ -17,6 +17,8 @@ parser.add_argument("--n_enc_layers", type=int, default=1, help="encoder num lay
 parser.add_argument("--fc_dim", type=int, default=256, help="nhid of fc layers")
 parser.add_argument("--n_classes", type=int, default=3, help="entailment/neutral/contradiction")
 parser.add_argument("--pool_type", type=str, default='max', help="max or mean")
+parser.add_argument("--use_cuda", type=bool, default=True, help="True or False")
+
 
 # train
 parser.add_argument("--n_epochs", type=int, default=20)
@@ -35,7 +37,6 @@ SEED
 '''
 np.random.seed(10)
 torch.manual_seed(10)
-torch.cuda.manual_seed(10)
 
 
 """
@@ -48,7 +49,6 @@ wv, default_wv = build_vocab(np.append(train['s1'], train['s2']), "w2v-model.txt
 '''
 MODEL
 '''
-torch.cuda.set_device(0)
 
 config_nli_model = {
     'n_words'        :  len(wv),
@@ -62,7 +62,7 @@ config_nli_model = {
     'n_classes'      :  params.n_classes,
     'pool_type'      :  params.pool_type,
     'encoder_type'   :  params.encoder_type,
-    'use_cuda'       :  False,
+    'use_cuda'       :  params.use_cuda,
 }
 
 nli_net = NLINet(config_nli_model)
@@ -80,8 +80,11 @@ from torch import optim
 optimizer = optim.Adam(nli_net.parameters(), lr=0.0001)
 
 # cuda 
-nli_net.cuda()
-loss_fn.cuda()
+if params.use_cuda:
+    torch.cuda.manual_seed(10)
+    torch.cuda.set_device(0)
+    nli_net.cuda()
+    loss_fn.cuda()
 
 
 '''
@@ -102,9 +105,13 @@ def trainepoch(epoch):
     for stidx in range(0, len(s1), params.batch_size):
         s1_batch, s1_len = get_batch(s1[stidx:stidx+params.batch_size], wv, default_wv)
         s2_batch, s2_len = get_batch(s2[stidx:stidx+params.batch_size], wv, default_wv)
-
-        s1_batch, s2_batch = Variable(s1_batch.cuda()), Variable(s2_batch.cuda())
-        tgt_batch = Variable(torch.LongTensor(target[stidx:stidx+params.batch_size])).cuda()
+        
+        if params.use_cuda:
+            s1_batch, s2_batch = Variable(s1_batch.cuda()), Variable(s2_batch.cuda())
+            tgt_batch = Variable(torch.LongTensor(target[stidx:stidx+params.batch_size])).cuda()
+        else:
+            s1_batch, s2_batch = Variable(s1_batch), Variable(s2_batch)
+            tgt_batch = Variable(torch.LongTensor(target[stidx:stidx+params.batch_size]))
         k = s1_batch.size(1)
         output = nli_net((s1_batch, s1_len), (s2_batch, s2_len))
         
@@ -148,9 +155,14 @@ def evaluate(epoch, eval_type='dev', final_eval=False):
         # prepare batch
         s1_batch, s1_len = get_batch(s1[i:i + params.batch_size], wv, default_wv)
         s2_batch, s2_len = get_batch(s2[i:i + params.batch_size], wv, default_wv)
-        s1_batch, s2_batch = Variable(s1_batch.cuda()), Variable(s2_batch.cuda())
-        tgt_batch = Variable(torch.LongTensor(target[i:i + params.batch_size])).cuda()
-
+        
+        if params.use_cuda:
+            s1_batch, s2_batch = Variable(s1_batch.cuda()), Variable(s2_batch.cuda())
+            tgt_batch = Variable(torch.LongTensor(target[i:i + params.batch_size])).cuda()
+        else:
+            s1_batch, s2_batch = Variable(s1_batch), Variable(s2_batch)
+            tgt_batch = Variable(torch.LongTensor(target[i:i + params.batch_size]))
+            
         # model forward
         output = nli_net((s1_batch, s1_len), (s2_batch, s2_len))
 

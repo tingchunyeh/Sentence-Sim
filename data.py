@@ -59,6 +59,7 @@ def read_kb(data_path):
     print("original shape: ", kb.shape)
     print("dropping duplicates ...")
     kb = kb.drop_duplicates(subset= ["question"])
+    kb = kb.dropna()
     print("after dropping duplicates: ", kb.shape)
     return kb
 

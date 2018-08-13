@@ -16,7 +16,7 @@ def get_batch(batch, wv, default_wv, dropout=0.0):
     
     for i in range(len(batch)):
         for j in range(len(batch[i])):
-            if np.reandom.rand()<dropout: continue
+            if np.random.rand()<dropout: continue
             print (j)
             if batch[i][j] not in wv:
                 embed[j, i, :] = default_wv

@@ -58,37 +58,37 @@ class GRUEncoder(nn.Module):
 
 
 class NLINet(nn.Module):
-	def __init__(self, config):
-		super(NLINet, self).__init__()
-
-		self.fc_dim = config['fc_dim']
-		self.n_classes = config['n_classes']
-		self.enc_lstm_dim = config['enc_lstm_dim']
-		self.encoder_type = config['encoder_type']
-		self.dpout_fc = config['dpout_fc']
-		
-		self.encoder = eval(self.encoder_type)(config)
-		self.inputdim = 4*self.enc_lstm_dim
-
-		# classifier
-		self.classifier = nn.Sequential(
-			nn.Dropout(p=self.dpout_fc),
-			nn.Linear(self.inputdim, self.fc_dim),
-			nn.Tanh(),
-			nn.Dropout(p=self.dpout_fc),
-			nn.Linear(self.fc_dim, self.n_classes),
+    def __init__(self, config):
+        super(NLINet, self).__init__()
+        
+        self.fc_dim = config['fc_dim']
+        self.n_classes = config['n_classes']
+        self.enc_lstm_dim = config['enc_lstm_dim']
+        self.encoder_type = config['encoder_type']
+        self.dpout_fc = config['dpout_fc']
+        
+        self.encoder = eval(self.encoder_type)(config)
+        self.inputdim = 4*self.enc_lstm_dim
+        
+        # classifier
+        self.classifier = nn.Sequential(
+            nn.Dropout(p=self.dpout_fc),
+            nn.Linear(self.inputdim, self.fc_dim),
+            nn.Tanh(),
+            nn.Dropout(p=self.dpout_fc),
+            nn.Linear(self.fc_dim, self.n_classes),
             nn.Softmax(dim=-1),
-			)
+        )
 
 
-	def forward(self, s1, s2):
-		u = self.encoder(s1)
-		v = self.encoder(s2)
-		features = torch.cat((u, v, torch.abs(u-v), u*v), 1)
-		output = self.classifier(features)
-		return output
-
-
-	def encode(self, s1):	
-		emb = self.encoder(s1)
-		pass
+    def forward(self, s1, s2):
+        u = self.encoder(s1)
+        v = self.encoder(s2)
+        features = torch.cat((u, v, torch.abs(u-v), u*v), 1)
+        output = self.classifier(features)
+        return output
+    
+    
+    def encode(self, s1):
+        emb = self.encoder(s1)
+        return emb

@@ -9,13 +9,15 @@ import time
 from gensim.models import Word2Vec, KeyedVectors
 import os
 
-def get_batch(batch, wv, default_wv):
+def get_batch(batch, wv, default_wv, dropout=0.0):
     lengths = np.array([len(x) for x in batch])
     max_len = np.max(lengths)
     embed = np.zeros((max_len, len(batch), 300))
     
     for i in range(len(batch)):
         for j in range(len(batch[i])):
+            if np.reandom.rand()<dropout: continue
+            print (j)
             if batch[i][j] not in wv:
                 embed[j, i, :] = default_wv
             else:

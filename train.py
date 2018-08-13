@@ -24,7 +24,8 @@ parser.add_argument("--use_cuda", type=bool, default=True, help="True or False")
 parser.add_argument("--n_epochs", type=int, default=20)
 parser.add_argument("--batch_size", type=int, default=64)
 parser.add_argument("--dpout_model", type=float, default=0., help="encoder dropout")
-parser.add_argument("--dpout_fc", type=float, default=0., help="classifier dropout")
+parser.add_argument("--dpout_fc", type=float, default=0.3, help="classifier dropout")
+parser.add_argument("--dpout_embed", type=float, default=0.3, help="embed dropout")
 parser.add_argument("--optimizer", type=str, default="sgd,lr=0.1", help="adam or sgd,lr=0.1")
 parser.add_argument("--last_model", type=str, default="", help="train on last saved model")
 parser.add_argument("--saved_model_name", type=str, default="model_new", help="saved model name")
@@ -55,8 +56,8 @@ config_nli_model = {
     'word_emb_dim'   :  300,
     'enc_lstm_dim'   :  params.enc_lstm_dim,
     'n_enc_layers'   :  params.n_enc_layers,
-    'dpout_model'    :  0,
-    'dpout_fc'       :  0.3,
+    'dpout_model'    :  params.dpout_model,
+    'dpout_fc'       :  params.dpout_fc,
     'fc_dim'         :  params.fc_dim,
     'bsize'          :  params.batch_size,
     'n_classes'      :  params.n_classes,
@@ -103,8 +104,8 @@ def trainepoch(epoch):
     target = train['label'][permutation]
     
     for stidx in range(0, len(s1), params.batch_size):
-        s1_batch, s1_len = get_batch(s1[stidx:stidx+params.batch_size], wv, default_wv)
-        s2_batch, s2_len = get_batch(s2[stidx:stidx+params.batch_size], wv, default_wv)
+        s1_batch, s1_len = get_batch(s1[stidx:stidx+params.batch_size], wv, default_wv, params.dpout_embed)
+        s2_batch, s2_len = get_batch(s2[stidx:stidx+params.batch_size], wv, default_wv, params.dpout_embed)
         
         if params.use_cuda:
             s1_batch, s2_batch = Variable(s1_batch.cuda()), Variable(s2_batch.cuda())
@@ -153,8 +154,8 @@ def evaluate(epoch, eval_type='dev', final_eval=False):
 
     for i in range(0, len(s1), params.batch_size):
         # prepare batch
-        s1_batch, s1_len = get_batch(s1[i:i + params.batch_size], wv, default_wv)
-        s2_batch, s2_len = get_batch(s2[i:i + params.batch_size], wv, default_wv)
+        s1_batch, s1_len = get_batch(s1[i:i + params.batch_size], wv, default_wv, params.dpout_embed)
+        s2_batch, s2_len = get_batch(s2[i:i + params.batch_size], wv, default_wv, params.dpout_embed)
         
         if params.use_cuda:
             s1_batch, s2_batch = Variable(s1_batch.cuda()), Variable(s2_batch.cuda())

@@ -13,7 +13,7 @@ parser.add_argument("--data_path", type=str, default='./data', help="path to dat
 # model
 parser.add_argument("--encoder_type", type=str, default='GRUEncoder', help="see list of encoders")
 parser.add_argument("--enc_lstm_dim", type=int, default=512, help="encoder nhid dimension")
-parser.add_argument("--n_enc_layers", type=int, default=1, help="encoder num layers")
+parser.add_argument("--num_layer", type=int, default=1, help="encoder num layers")
 parser.add_argument("--fc_dim", type=int, default=256, help="nhid of fc layers")
 parser.add_argument("--n_classes", type=int, default=3, help="entailment/neutral/contradiction")
 parser.add_argument("--pool_type", type=str, default='max', help="max or mean")

@@ -56,7 +56,6 @@ class GRUEncoder(nn.Module):
         else:
             emb = emb.index_select(0, Variable(torch.LongTensor(idx_unsort)))
             
-        print(emb.size())
         return emb
     
 

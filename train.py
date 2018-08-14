@@ -55,7 +55,7 @@ config_nli_model = {
     'n_words'        :  len(wv),
     'word_emb_dim'   :  300,
     'enc_lstm_dim'   :  params.enc_lstm_dim,
-    'n_enc_layers'   :  params.n_enc_layers,
+    'num_layer'      :  params.num_layer,
     'dpout_model'    :  params.dpout_model,
     'dpout_fc'       :  params.dpout_fc,
     'fc_dim'         :  params.fc_dim,

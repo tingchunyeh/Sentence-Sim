@@ -104,7 +104,7 @@ def trainepoch(epoch):
     s2 = train['s2'][permutation]
     target = train['label'][permutation]
     
-    for stidx in tqdm(range(0, len(s1), params.batch_size)):
+    for stidx in range(0, len(s1), params.batch_size):
         s1_batch, s1_len = get_batch(s1[stidx:stidx+params.batch_size], wv, default_wv, params.dpout_embed)
         s2_batch, s2_len = get_batch(s2[stidx:stidx+params.batch_size], wv, default_wv, params.dpout_embed)
         
@@ -130,11 +130,11 @@ def trainepoch(epoch):
         loss.backward()
         optimizer.step()
 
-#         if len(all_costs) == 100:
-#             logs.append('{0} ; loss {1}  ; accuracy train : {2}'.format(stidx, 
-#                             round(np.mean(all_costs), 2), round(100.*correct/(stidx+k), 2)))
-#             print(logs[-1])
-#             all_costs = []
+        if len(all_costs) == 100:
+            logs.append('{0} ; loss {1}  ; accuracy train : {2}'.format(stidx, 
+                            round(np.mean(all_costs), 2), round(100.*correct/(stidx+k), 2)))
+            print(logs[-1])
+            all_costs = []
             
     train_acc = round(100 * correct/len(s1), 2)
     train_loss = round(np.mean(tot_costs), 2)

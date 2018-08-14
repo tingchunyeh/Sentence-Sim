@@ -26,7 +26,7 @@ parser.add_argument("--batch_size", type=int, default=64)
 parser.add_argument("--dpout_model", type=float, default=0., help="encoder dropout")
 parser.add_argument("--dpout_fc", type=float, default=0.3, help="classifier dropout")
 parser.add_argument("--dpout_embed", type=float, default=0.2, help="embed dropout")
-parser.add_argument("--optimizer", type=str, default="sgd,lr=0.1", help="adam or sgd,lr=0.1")
+parser.add_argument("--lr", type=float, default=0.005, help="learning rate for adam")
 parser.add_argument("--last_model", type=str, default="", help="train on last saved model")
 parser.add_argument("--saved_model_name", type=str, default="model_new", help="saved model name")
 
@@ -78,7 +78,7 @@ loss_fn.size_average = False
 
 # optimizer
 from torch import optim
-optimizer = optim.Adam(nli_net.parameters(), lr=0.0001)
+optimizer = optim.Adam(nli_net.parameters(), lr=params.lr)
 
 # cuda 
 if params.use_cuda:
@@ -103,7 +103,7 @@ def trainepoch(epoch):
     s2 = train['s2'][permutation]
     target = train['label'][permutation]
     
-    for stidx in range(0, len(s1), params.batch_size):
+    for stidx in tqdm(range(0, len(s1), params.batch_size)):
         s1_batch, s1_len = get_batch(s1[stidx:stidx+params.batch_size], wv, default_wv, params.dpout_embed)
         s2_batch, s2_len = get_batch(s2[stidx:stidx+params.batch_size], wv, default_wv, params.dpout_embed)
         
@@ -128,12 +128,12 @@ def trainepoch(epoch):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
- 
-        if len(all_costs) == 100:
-            logs.append('{0} ; loss {1}  ; accuracy train : {2}'.format(stidx, 
-                            round(np.mean(all_costs), 2), round(100.*correct/(stidx+k), 2)))
-            print(logs[-1])
-            all_costs = []
+
+#         if len(all_costs) == 100:
+#             logs.append('{0} ; loss {1}  ; accuracy train : {2}'.format(stidx, 
+#                             round(np.mean(all_costs), 2), round(100.*correct/(stidx+k), 2)))
+#             print(logs[-1])
+#             all_costs = []
             
     train_acc = round(100 * correct/len(s1), 2)
     train_loss = round(np.mean(tot_costs), 2)

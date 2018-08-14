@@ -14,13 +14,15 @@ class GRUEncoder(nn.Module):
         self.pool_type = config['pool_type']
         self.dpout_model = config['dpout_model']
         self.use_cuda = config['use_cuda']
+        self.num_layer = config['num_layer']
         
-        self.enc_lstm = nn.GRU(self.word_emb_dim, self.enc_lstm_dim, 1, bidirectional=False, dropout=self.dpout_model)
+        
+        self.enc_lstm = nn.GRU(self.word_emb_dim, self.enc_lstm_dim, self.num_layer, bidirectional=True, dropout=self.dpout_model)
         
         if self.use_cuda:
-            self.init_lstm = Variable(torch.FloatTensor(1, self.bsize, self.enc_lstm_dim).zero_()).cuda()
+            self.init_lstm = Variable(torch.FloatTensor(self.num_layer*2, self.bsize, self.enc_lstm_dim).zero_()).cuda()
         else:
-            self.init_lstm = Variable(torch.FloatTensor(1, self.bsize, self.enc_lstm_dim).zero_())
+            self.init_lstm = Variable(torch.FloatTensor(self.num_layer*2, self.bsize, self.enc_lstm_dim).zero_())
 
 
     def forward(self, sent_tuple):
@@ -32,9 +34,9 @@ class GRUEncoder(nn.Module):
         
         if bsize != self.init_lstm.size(1):
             if self.use_cuda:
-                self.init_lstm = Variable(torch.FloatTensor(1, bsize, self.enc_lstm_dim).zero_()).cuda()
+                self.init_lstm = Variable(torch.FloatTensor(self.num_layer*2, bsize, self.enc_lstm_dim).zero_()).cuda()
             else:
-                self.init_lstm = Variable(torch.FloatTensor(1, bsize, self.enc_lstm_dim).zero_())
+                self.init_lstm = Variable(torch.FloatTensor(self.num_layer*2, bsize, self.enc_lstm_dim).zero_())
         
         # Sort by length (keep idx)
         sent_len, idx_sort = np.sort(sent_len)[::-1], np.argsort(-sent_len)
@@ -45,16 +47,18 @@ class GRUEncoder(nn.Module):
         
         # Handling padding in Recurrent Networks
         sent_packed = nn.utils.rnn.pack_padded_sequence(sent, sent_len)
-        sent_output = self.enc_lstm(sent_packed, self.init_lstm)[1].squeeze(0)
-        # batch x 2*nhid
+        sent_output, hidden = self.enc_lstm(sent_packed, self.init_lstm)
+        emb = torch.cat((hidden[0], hidden[1]), 1) # batch x 2*nhid
         
-        # Un-sort by length
         idx_unsort = np.argsort(idx_sort)
         if self.use_cuda:
-            emb = sent_output.index_select(0, Variable(torch.cuda.LongTensor(idx_unsort)))
+            emb = emb.index_select(0, Variable(torch.cuda.LongTensor(idx_unsort)))
         else:
-            emb = sent_output.index_select(0, Variable(torch.LongTensor(idx_unsort)))
+            emb = emb.index_select(0, Variable(torch.LongTensor(idx_unsort)))
+            
+        print(emb.size())
         return emb
+    
 
 
 class NLINet(nn.Module):
@@ -68,7 +72,7 @@ class NLINet(nn.Module):
         self.dpout_fc = config['dpout_fc']
         
         self.encoder = eval(self.encoder_type)(config)
-        self.inputdim = 4*self.enc_lstm_dim
+        self.inputdim = 8*self.enc_lstm_dim
         
         # classifier
         self.classifier = nn.Sequential(

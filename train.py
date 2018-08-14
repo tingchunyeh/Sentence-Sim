@@ -131,7 +131,7 @@ def trainepoch(epoch):
         optimizer.step()
 
         if len(all_costs) == 100:
-            logs.append('{0} ; loss {1}  ; accuracy train : {2}'.format(stidx, 
+            logs.append('{0};  loss {1};  accuracy train: {2}'.format(stidx, 
                             round(np.mean(all_costs), 2), round(100.*correct/(stidx+k), 2)))
             print(logs[-1])
             all_costs = []
@@ -174,9 +174,9 @@ def evaluate(epoch, eval_type='dev', final_eval=False):
     # save model
     eval_acc = round(100 * correct / len(s1), 2)
     if final_eval:
-        print('finalgrep : accuracy {0} : {1}'.format(eval_type, eval_acc))
+        print('finalgrep:  accuracy {0}: {1}'.format(eval_type, eval_acc))
     else:
-        print('togrep : results : epoch {0} ; mean accuracy {1} :{2}'.format(epoch, eval_type, eval_acc))
+        print('togrep:  results: epoch {0};  mean accuracy {1}:{2}'.format(epoch, eval_type, eval_acc))
 
     if eval_type == 'dev' and eval_acc > val_acc_best:
         with open( os.path.join("saved_model", params.saved_model_name+"_cnofig.pickle" ), 'wb') as handle:
@@ -203,13 +203,13 @@ for i in range(params.n_epochs):
     train_loss, train_acc = trainepoch(i)
     train_loss_ls.append(train_loss)
     train_acc_ls.append(train_acc)
-    print('results : epoch {0} ; loss: {1} mean accuracy train : {2}'.format(i, train_loss, train_acc))
+    print('results: epoch {0};  loss: {1} mean accuracy train: {2}'.format(i, train_loss, train_acc))
     if i%1==0:
         print("-"*100)
-        print('\nEVALIDATING : Epoch ' + str(i))
+        print('\nEVALIDATING: Epoch ' + str(i))
         eval_acc = evaluate(i, eval_type='dev', final_eval=False)
         eval_acc_ls.append(eval_acc)
-        print('results : epoch {0} ;  mean accuracy dev : {1}'.format(i, eval_acc))
+        print('results: epoch {0};  mean accuracy dev: {1}'.format(i, eval_acc))
         print("-"*100)
 
 

@@ -68,6 +68,7 @@ config_nli_model = {
 
 nli_net = NLINet(config_nli_model)
 if params.last_model:
+    print("load model {}".format(params.last_model))
     nli_net.load_state_dict(torch.load(os.path.join("saved_model", params.last_model)))
 print(nli_net)
 

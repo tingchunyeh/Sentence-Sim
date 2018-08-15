@@ -29,6 +29,8 @@ parser.add_argument("--dpout_embed", type=float, default=0.2, help="embed dropou
 parser.add_argument("--lr", type=float, default=0.005, help="learning rate for adam")
 parser.add_argument("--last_model", type=str, default="", help="train on last saved model")
 parser.add_argument("--saved_model_name", type=str, default="model_new", help="saved model name")
+parser.add_argument("--w2v_model", type=str, default="wiki.zh.vec", help="w2v file name")
+
 
 params, _ = parser.parse_known_args()
 
@@ -44,7 +46,7 @@ torch.manual_seed(10)
 DATA
 """
 train, dev, test = get_nl(params.data_path)
-wv, default_wv = build_vocab(np.append(train['s1'], train['s2']), "w2v-model.txt")
+wv, default_wv = build_vocab(np.append(train['s1'], train['s2']), params.w2v_model)
 
 
 '''
@@ -131,7 +133,7 @@ def trainepoch(epoch):
         optimizer.step()
 
         if len(all_costs) == 100:
-            logs.append('{0};  loss {1};  accuracy train: {2}'.format(stidx, 
+            logs.append('{0};  loss: {1};  accuracy train: {2}'.format(stidx, 
                             round(np.mean(all_costs), 2), round(100.*correct/(stidx+k), 2)))
             print(logs[-1])
             all_costs = []

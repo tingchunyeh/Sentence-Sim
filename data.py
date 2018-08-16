@@ -8,6 +8,7 @@ from tqdm import tqdm
 import time
 from gensim.models import Word2Vec, KeyedVectors
 import os
+import collections
 
 def get_batch(batch, wv, default_wv, dropout=0.0):
     lengths = np.array([len(x) for x in batch])
@@ -29,22 +30,25 @@ def create_pair_data(kb_answer):
     for s_id in tqdm(kb_answer.index):
         sentence, code, code2 = kb_answer.loc[s_id, 'question'], kb_answer.loc[s_id, 'code'], kb_answer.loc[s_id, 'code2']
         same_code_sentences = kb_answer[kb_answer.code == code]
-        same_code2_sentences = kb_answer[kb_answer.code2 == code2]
+        same_code2_sentences = kb_answer[(kb_answer.code2 == code2) & (kb_answer.code!=code)]
+        
         
         # random sample at most 5 sentences in same code
-        same_code_samples = same_code_sentences.sample(n=min(10,same_code_sentences.shape[0]))
-#         same_code_samples = same_code_sentences.sample(n= same_code_sentences.shape[0])
-        # random sample at most 5 sentences in same code2
-        same_code2_samples = same_code2_sentences.sample(n=min(10,same_code2_sentences.shape[0]))
-        # random sample at most 10 sentence in different code2
-        different_samples = kb_answer.sample(n=20)
-        
+        same_code_samples = same_code_sentences.sample(n=min(20,same_code_sentences.shape[0]))
         for s2 in same_code_samples['question']:
             pairs.append((sentence, s2, 5))
-        for s2 in same_code2_samples['question']:
-            pairs.append((sentence, s2, 3))
+            
+        # random sample at most 5 sentences in same code2
+        if same_code2_sentences.shape[0]>0:
+            same_code2_samples = same_code2_sentences.sample(n=min(20,same_code2_sentences.shape[0]))
+            for s2 in same_code2_samples['question']:
+                pairs.append((sentence, s2, 3))
+            
+        # random sample at most 10 sentence in different code2
+        different_samples = kb_answer[(kb_answer.code!=code) & (kb_answer.code2!=code2)].sample(n=20)
         for s2 in different_samples['question']:
             pairs.append((sentence, s2, 0))
+    
     pairs_df = pd.DataFrame(pairs)
     pairs_df.columns = ['s1', 's2', 'score']
     return pairs_df

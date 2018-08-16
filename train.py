@@ -1,4 +1,3 @@
-from helper import *
 from data import *
 from models import *
 import argparse
@@ -12,7 +11,7 @@ parser.add_argument("--data_path", type=str, default='./data', help="path to dat
 
 # model
 parser.add_argument("--encoder_type", type=str, default='GRUEncoder', help="see list of encoders")
-parser.add_argument("--enc_lstm_dim", type=int, default=512, help="encoder nhid dimension")
+parser.add_argument("--enc_lstm_dim", type=int, default=256, help="encoder nhid dimension")
 parser.add_argument("--num_layer", type=int, default=1, help="encoder num layers")
 parser.add_argument("--fc_dim", type=int, default=256, help="nhid of fc layers")
 parser.add_argument("--n_classes", type=int, default=3, help="entailment/neutral/contradiction")
@@ -24,16 +23,16 @@ parser.add_argument("--use_cuda", type=bool, default=True, help="True or False")
 parser.add_argument("--n_epochs", type=int, default=20)
 parser.add_argument("--batch_size", type=int, default=64)
 parser.add_argument("--dpout_model", type=float, default=0., help="encoder dropout")
-parser.add_argument("--dpout_fc", type=float, default=0.3, help="classifier dropout")
-parser.add_argument("--dpout_embed", type=float, default=0.2, help="embed dropout")
-parser.add_argument("--lr", type=float, default=0.005, help="learning rate for adam")
+parser.add_argument("--dpout_fc", type=float, default=0.2, help="classifier dropout")
+parser.add_argument("--dpout_embed", type=float, default=0., help="embed dropout")
+parser.add_argument("--lr", type=float, default=0.001, help="learning rate for adam")
 parser.add_argument("--last_model", type=str, default="", help="train on last saved model")
 parser.add_argument("--saved_model_name", type=str, default="model_new", help="saved model name")
-parser.add_argument("--w2v_model", type=str, default="wiki.zh.vec", help="w2v file name")
+parser.add_argument("--w2v_model", type=str, default="w2v-model.txt", help="w2v file name")
 
 
 params, _ = parser.parse_known_args()
-
+print(params)
 
 '''
 SEED

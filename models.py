@@ -15,9 +15,22 @@ class GRUEncoder(nn.Module):
         self.dpout_model = config['dpout_model']
         self.use_cuda = config['use_cuda']
         self.num_layer = config['num_layer']
+#         self.dpout_embed = config['dpout_embed']
+#         embed_freeze = config['embed_freeze']
+#         embed_matrix = config['embed_matrix']
+#         vocab_size, embed_size = embed_matrix.shape
+#         self.custom_params = []
+        
+#         self.embed = nn.Embedding(vocab_size, embed_sie)
+#         self.embed.weight = nn.Parameter(torch.from_numpy(embed_matrix).type(torch.FloatTensor), requires_grad=not embed_freeze)
+#         self.embed_dropout = nn.Dropout(self.dpout_embed)
+#         if not embed_freeze:
+#             self.custom_params.append(self.embed.weight)
         
         
         self.enc_lstm = nn.GRU(self.word_emb_dim, self.enc_lstm_dim, self.num_layer, bidirectional=True, dropout=self.dpout_model)
+#         for param in self.enc_lstm.parameters():
+#             self.custom_params.append(param)
         
         if self.use_cuda:
             self.init_lstm = Variable(torch.FloatTensor(self.num_layer*2, self.bsize, self.enc_lstm_dim).zero_()).cuda()

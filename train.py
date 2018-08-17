@@ -180,7 +180,7 @@ def evaluate(epoch, eval_type='dev', final_eval=False):
         print('togrep:  results: epoch {0};  mean accuracy {1}:{2}'.format(epoch, eval_type, eval_acc))
 
     if eval_type == 'dev' and eval_acc > val_acc_best:
-        with open( os.path.join("saved_model", params.saved_model_name+"_cnofig.pickle" ), 'wb') as handle:
+        with open( os.path.join("saved_model", params.saved_model_name+"_config.pickle" ), 'wb') as handle:
             pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
         print('saving model at epoch {0}'.format(epoch))
         if not os.path.exists("saved_model"): os.makedirs("saved_model")
@@ -198,7 +198,7 @@ Train model
 train_loss_ls = []
 train_acc_ls = []
 eval_acc_ls = []
-
+eval_acc = 0
 for i in range(params.n_epochs):
     print('\nTRAINING : Epoch ' + str(i))
     train_loss, train_acc = trainepoch(i)
